@@ -1,5 +1,5 @@
 blueprint:
-  name: Motion-activated light scene with surrounding light level check
+  name: Motion-activated light scene with surrounding light level check and optional ambient scene
   description: Turn on a light scene when motion is detected. Three different scenes can be defined depending on time of day. Furthermore a source for checking sourrounding light can be defined to enable light only if it is dark enough.
   domain: automation
   source_url: https://gist.github.com/dirkk1980/3e5c23acb05fb639bafdc5036b91aae6
@@ -31,6 +31,17 @@ blueprint:
         target:
           entity:
             domain: light
+    scene_ambient_enabled:
+      name: Enable Ambient Scene
+      description: Enable scene for ambient state. Will be activated when no motion is detected and light level is under threshold.
+      selector:
+        boolean:
+    scene_ambient:
+      name: Ambient Scene
+      description: Scene for ambient state. Will be activated when no motion is detected and light level is under threshold.
+      selector:
+        entity:
+          domain: scene
     scene_morning:
       name: Scene for the morning
       selector:
@@ -84,6 +95,9 @@ blueprint:
 mode: restart
 max_exceeded: silent
 
+variables:
+  scene_ambient_enabled: !input scene_ambient_enabled
+
 trigger:
   platform: state
   entity_id: !input motion_entity
@@ -134,5 +148,14 @@ action:
       from: "on"
       to: "off"
   - delay: !input no_motion_wait
-  - service: light.turn_off
-    target: !input light_target
+  - choose:
+      - conditions:
+          - "{{ scene_ambient_enabled }}"
+          - condition: numeric_state
+            entity_id: !input lightsensor_entity
+            below: !input illuminace_level
+        sequence:
+          - scene: !input scene_ambient
+    default:
+      - service: light.turn_off
+        target: !input light_target

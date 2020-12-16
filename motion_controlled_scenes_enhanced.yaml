@@ -126,7 +126,7 @@ trigger:
 action:
   - choose:
       - conditions:
-          - "{{ scene_morning != scene.none}}"
+          - "{{ scene_morning != 'scene.none'}}"
           - condition: time
             after: !input time_scene_morning
             before: !input time_scene_day
@@ -136,7 +136,7 @@ action:
         sequence:
           - scene: !input scene_morning
       - conditions:
-          - "{{ scene_day != scene.none}}"
+          - "{{ scene_day != 'scene.none'}}"
           - condition: time
             after: !input time_scene_day
             before: !input time_scene_evening
@@ -146,7 +146,7 @@ action:
         sequence:
           - scene: !input scene_day
       - conditions:
-          - "{{ scene_evening != scene.none}}"
+          - "{{ scene_evening != 'scene.none'}}"
           - condition: time
             after: !input time_scene_evening
             before: !input time_scene_night
@@ -156,7 +156,7 @@ action:
         sequence:
           - scene: !input scene_evening
       - conditions:
-          - "{{ scene_night != scene.none}}"
+          - "{{ scene_night != 'scene.none'}}"
           - condition: time
             after: !input time_scene_night
             before: !input time_scene_morning
@@ -173,7 +173,7 @@ action:
   - delay: !input no_motion_wait
   - choose:
       - conditions:
-          - "{{ scene_ambient != scene.none}}"
+          - "{{ scene_ambient != 'scene.none'}}"
           - condition: time
             after: !input time_scene_ambient_start
             before: !input time_scene_ambient_end

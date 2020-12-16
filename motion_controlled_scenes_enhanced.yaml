@@ -2,7 +2,7 @@ blueprint:
   name: Motion-activated light scene with surrounding light level check
   description: Turn on a light scene when motion is detected. Three different scenes can be defined depending on time of day. Furthermore a source for checking sourrounding light can be defined to enable light only if it is dark enough.
   domain: automation
-  source_url: https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/blueprints/motion_light.yaml
+  source_url: https://gist.github.com/dirkk1980/3e5c23acb05fb639bafdc5036b91aae6
   input:
     motion_entity:
       name: Motion Sensor

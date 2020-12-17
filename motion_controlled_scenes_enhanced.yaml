@@ -51,7 +51,7 @@ blueprint:
       selector:
         time:
     scene_morning:
-      name: Scene for the morning  (Optional)
+      name: Scene for the morning
       default: scene.none
       selector:
         entity:
@@ -63,7 +63,7 @@ blueprint:
       selector:
         time:
     scene_day:
-      name: Scene for the bright day  (Optional)
+      name: Scene for the bright day
       default: scene.none
       selector:
         entity:
@@ -75,7 +75,7 @@ blueprint:
       selector:
         time:
     scene_evening:
-      name: Scene for the evening  (Optional)
+      name: Scene for the evening
       default: scene.none
       selector:
         entity:
@@ -87,7 +87,7 @@ blueprint:
       selector:
         time:
     scene_night:
-      name: Scene for the dark night  (Optional)
+      name: Scene for the dark night
       default: scene.none
       selector:
         entity:
@@ -113,20 +113,15 @@ max_exceeded: silent
 
 variables:
   scene_ambient: !input scene_ambient
-  scene_morning: !input scene_morning
-  scene_day: !input scene_day
-  scene_evening: !input scene_evening
-  scene_night: !input scene_night
 trigger:
   platform: state
   entity_id: !input motion_entity
   from: "off"
   to: "on"
-
+## condition for illumination has to be checked for every scece and not global. reason: action should be also triggered if no lights should be enabled to switch off ambient scene if it is to bright
 action:
   - choose:
       - conditions:
-          - "{{ scene_morning != 'scene.none'}}"
           - condition: time
             after: !input time_scene_morning
             before: !input time_scene_day
@@ -136,7 +131,6 @@ action:
         sequence:
           - scene: !input scene_morning
       - conditions:
-          - "{{ scene_day != 'scene.none'}}"
           - condition: time
             after: !input time_scene_day
             before: !input time_scene_evening
@@ -146,7 +140,6 @@ action:
         sequence:
           - scene: !input scene_day
       - conditions:
-          - "{{ scene_evening != 'scene.none'}}"
           - condition: time
             after: !input time_scene_evening
             before: !input time_scene_night
@@ -156,7 +149,6 @@ action:
         sequence:
           - scene: !input scene_evening
       - conditions:
-          - "{{ scene_night != 'scene.none'}}"
           - condition: time
             after: !input time_scene_night
             before: !input time_scene_morning

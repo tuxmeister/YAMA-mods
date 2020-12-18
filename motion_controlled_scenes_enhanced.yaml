@@ -1,8 +1,8 @@
 blueprint:
-  name: Motion-activated light scene with surrounding light level check and optional ambient scene
-  description: Turn on a light scene when motion is detected. Three different scenes can be defined depending on time of day. Furthermore a source for checking sourrounding light can be defined to enable light only if it is dark enough.
+  name: Motion-activated light scene with and optional ambient scene
+  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day.
   domain: automation
-  source_url: https://gist.github.com/dirkk1980/3e5c23acb05fb639bafdc5036b91aae6
+  source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
     motion_entity:
       name: Motion Sensor
@@ -10,21 +10,6 @@ blueprint:
         entity:
           domain: binary_sensor
           device_class: motion
-    lightsensor_entity:
-      name: Illuminance Sensor
-      selector:
-        entity:
-          domain: sensor
-          device_class: illuminance
-    illuminace_level:
-      name: Max Illuminance
-      description: Maximal immuminance level in lux. If illuminance is higher, light will not be enabled
-      default: 600
-      selector:
-        number:
-          min: 0
-          max: 5000
-          unit_of_measurement: lux
     light_target:
       name: Light
       selector:
@@ -33,7 +18,7 @@ blueprint:
             domain: light
     scene_ambient:
       name: Ambient Scene (Optional)
-      description: Scene for ambient state. Will be activated when no motion is detected and light level is under threshold. Default value = scene.none
+      description: Scene for ambient state. Will be activated when no motion is detected. Default value = scene.none
       default: scene.none
       selector:
         entity:
@@ -113,50 +98,50 @@ max_exceeded: silent
 
 variables:
   scene_ambient: !input scene_ambient
+  scene_morning: !input scene_morning
+  scene_day: !input scene_day
+  scene_evening: !input scene_evening
+  scene_night: !input scene_night
+
 trigger:
   platform: state
   entity_id: !input motion_entity
   from: "off"
   to: "on"
-## condition for illumination has to be checked for every scece and not global. reason: action should be also triggered if no lights should be enabled to switch off ambient scene if it is to bright
+
 action:
   - choose:
       - conditions:
+          - "{{ scene_morning != 'scene.none'}}"
           - condition: time
             after: !input time_scene_morning
             before: !input time_scene_day
-          - condition: numeric_state
-            entity_id: !input lightsensor_entity
-            below: !input illuminace_level
         sequence:
           - scene: !input scene_morning
       - conditions:
+          - "{{ scene_day != 'scene.none'}}"
           - condition: time
             after: !input time_scene_day
             before: !input time_scene_evening
-          - condition: numeric_state
-            entity_id: !input lightsensor_entity
-            below: !input illuminace_level
         sequence:
           - scene: !input scene_day
       - conditions:
+          - "{{ scene_evening != 'scene.none'}}"
           - condition: time
             after: !input time_scene_evening
             before: !input time_scene_night
-          - condition: numeric_state
-            entity_id: !input lightsensor_entity
-            below: !input illuminace_level
         sequence:
           - scene: !input scene_evening
       - conditions:
+          - "{{ scene_night != 'scene.none'}}"
           - condition: time
             after: !input time_scene_night
             before: !input time_scene_morning
-          - condition: numeric_state
-            entity_id: !input lightsensor_entity
-            below: !input illuminace_level
         sequence:
           - scene: !input scene_night
+    default:
+      - service: light.turn_on
+        target: !input light_target
   - wait_for_trigger:
       platform: state
       entity_id: !input motion_entity
@@ -169,9 +154,6 @@ action:
           - condition: time
             after: !input time_scene_ambient_start
             before: !input time_scene_ambient_end
-          - condition: numeric_state
-            entity_id: !input lightsensor_entity
-            below: !input illuminace_level
         sequence:
           - scene: !input scene_ambient
     default:

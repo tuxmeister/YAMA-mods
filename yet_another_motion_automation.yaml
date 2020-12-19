@@ -1,6 +1,6 @@
 blueprint:
   name: Yet Another Motion Automation
-  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day.
+  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V02
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
@@ -16,6 +16,13 @@ blueprint:
         target:
           entity:
             domain: light
+    automation_blocker:
+      name: Automation Blocker
+      description: Only run if this boolean is true (Optional)
+      default: input_boolean.none
+      selector:
+        entity:
+          domain: input_boolean 
     scene_ambient:
       name: Ambient Scene (Optional)
       description: Scene for ambient state. Will be activated when no motion is detected. Default value = scene.none
@@ -102,12 +109,17 @@ variables:
   scene_day: !input scene_day
   scene_evening: !input scene_evening
   scene_night: !input scene_night
+  automation_blocker: !input automation_blocker
 
 trigger:
   platform: state
   entity_id: !input motion_entity
   from: "off"
   to: "on"
+
+condition:
+  - condition: template
+    value_template:  "{{ automation_blocker == 'input_boolean.none' or (states[automation_blocker].state == 'on') }}" 
 
 action:
   - choose:

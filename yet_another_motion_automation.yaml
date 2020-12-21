@@ -6,10 +6,8 @@ blueprint:
   input:
     motion_entity:
       name: Motion Sensor
+      description: Motion Sensor or a group with Motion Sensors (But can be anything switching between "on" and "off")
       selector:
-        entity:
-          domain: binary_sensor
-          device_class: motion
     light_target:
       name: Light
       selector:
@@ -22,7 +20,7 @@ blueprint:
       default: input_boolean.none
       selector:
         entity:
-          domain: input_boolean 
+          domain: input_boolean
     scene_ambient:
       name: Ambient Scene (Optional)
       description: Scene for ambient state. Will be activated when no motion is detected. Default value = scene.none
@@ -119,7 +117,7 @@ trigger:
 
 condition:
   - condition: template
-    value_template:  "{{ automation_blocker == 'input_boolean.none' or (states[automation_blocker].state == 'on') }}" 
+    value_template: "{{ automation_blocker == 'input_boolean.none' or (states[automation_blocker].state == 'on') }}"
 
 action:
   - choose:

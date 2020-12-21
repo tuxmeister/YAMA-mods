@@ -1,6 +1,6 @@
 blueprint:
   name: Yet Another Motion Automation
-  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V02
+  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V03
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:

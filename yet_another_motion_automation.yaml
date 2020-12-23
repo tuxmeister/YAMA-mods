@@ -1,6 +1,6 @@
 blueprint:
   name: Yet Another Motion Automation
-  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V03
+  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V04
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
@@ -16,12 +16,21 @@ blueprint:
           entity:
             domain: light
     automation_blocker:
-      name: Automation Blocker
-      description: Only run if this boolean is true (Optional)
-      default: input_boolean.none
+      name: Automation Blocker (Optional)
+      description: Only run if this boolean is true
+      default:
       selector:
         entity:
-          domain: input_boolean 
+          domain: input_boolean
+    elevation_check:
+      name: Sun elevation check (Optional)
+      description: This is the angle between the sun and the horizon. Negative values mean the sun is BELOW the horizon.
+      default:
+      selector:
+        number:
+          min: -90
+          max: 90
+          unit_of_measurement: degrees
     scene_ambient:
       name: Ambient Scene (Optional)
       description: Scene for ambient state. Will be activated when no motion is detected. Default value = scene.none
@@ -109,6 +118,7 @@ variables:
   scene_evening: !input scene_evening
   scene_night: !input scene_night
   automation_blocker: !input automation_blocker
+  elevation_check: !input elevation_check
 
 trigger:
   platform: state
@@ -117,8 +127,12 @@ trigger:
   to: "on"
 
 condition:
+  # Check if automation blocker exist and if yes if it is on, otherwise do not run
   - condition: template
-    value_template:  "{{ automation_blocker == 'input_boolean.none' or (states[automation_blocker].state == 'on') }}" 
+    value_template: "{{ (automation_blocker == none) or (states[automation_blocker].state == 'on') }}"
+  # Check if elevation input exist and if yes it is below desired value, otherwise do not run
+  - condition: template
+    value_template: "{{ (elevation_check == none) or (state_attr('sun.sun','elevation') <= elevation_check | float) }}"
 
 action:
   - choose:

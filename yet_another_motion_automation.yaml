@@ -33,7 +33,7 @@ blueprint:
           unit_of_measurement: degrees
     scene_ambient:
       name: Ambient Scene (Optional)
-      description: Scene for ambient state. Will be activated when no motion is detected. Default value = scene.none
+      description: Scene for ambient state. Will be activated when no motion is detected.
       default: scene.none
       selector:
         entity:
@@ -98,6 +98,13 @@ blueprint:
       default: "00:00:00"
       selector:
         time:
+    scene_no_motion:
+      name: Default scene for no motion (Optional)
+      description: Set this Scene if you want to activate a scene if motion stops
+      default: scene.none
+      selector:
+        entity:
+          domain: scene
     no_motion_wait:
       name: Wait time
       description: Time to leave the light on after last motion is detected.
@@ -119,6 +126,7 @@ variables:
   scene_night: !input scene_night
   automation_blocker: !input automation_blocker
   elevation_check: !input elevation_check
+  scene_no_motion: !input scene_no_motion
 
 trigger:
   platform: state
@@ -174,13 +182,20 @@ action:
       to: "off"
   - delay: !input no_motion_wait
   - choose:
+      # Used if ambient scene is true and in ambient scene time frame
       - conditions:
-          - "{{ scene_ambient != 'scene.none'}}"
+          - "{{ scene_ambient != 'scene.none' }}"
           - condition: time
             after: !input time_scene_ambient_start
             before: !input time_scene_ambient_end
         sequence:
           - scene: !input scene_ambient
+      # Used if default no motion scene is set
+      - conditions:
+          - "{{ scene_no_motion != 'scene.none' }}"
+        sequence:
+          - scene: !input scene_no_motion
+    # Default to turn lights off
     default:
       - service: light.turn_off
         target: !input light_target

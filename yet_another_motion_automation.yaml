@@ -1,6 +1,6 @@
 blueprint:
   name: Yet Another Motion Automation
-  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V05
+  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V06
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
@@ -17,11 +17,17 @@ blueprint:
             domain: light
     automation_blocker:
       name: Automation Blocker (Optional)
-      description: Only run if this boolean is true
+      description: Only run if this boolean is in desired state (see next input)
       default:
       selector:
         entity:
           domain: input_boolean
+    automation_blocker_boolean:
+      name: Automation Blocker Chooser (Optional)
+      description: Should the automation blocker on or off? Choose on for on and off for off
+      default: false
+      selector:
+        boolean: 
     elevation_check:
       name: Sun elevation check (Optional)
       description: This is the angle between the sun and the horizon. Negative values mean the sun is BELOW the horizon.
@@ -58,7 +64,7 @@ blueprint:
           domain: scene
     time_scene_morning:
       name: Time for the morning scene
-      description: A time input which defines the time from which on the scene will be activated if motion is detected. Default value = scene.none
+      description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
@@ -70,7 +76,7 @@ blueprint:
           domain: scene
     time_scene_day:
       name: Time for the day scene
-      description: A time input which defines the time from which on the scene will be activated if motion is detected. Default value = scene.none
+      description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
@@ -82,7 +88,7 @@ blueprint:
           domain: scene
     time_scene_evening:
       name: Time for the evening scene
-      description: A time input which defines the time from which on the scene will be activated if motion is detected. Default value = scene.none
+      description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
@@ -94,7 +100,7 @@ blueprint:
           domain: scene
     time_scene_night:
       name: Time for the night scene
-      description: A time input which defines the time from which on the scene will be activated if motion is detectedd. Default value = scene.none
+      description: A time input which defines the time from which on the scene will be activated if motion is detectedd.
       default: "00:00:00"
       selector:
         time:
@@ -125,6 +131,7 @@ variables:
   scene_evening: !input scene_evening
   scene_night: !input scene_night
   automation_blocker: !input automation_blocker
+  automation_blocker_boolean : !input automation_blocker_boolean
   elevation_check: !input elevation_check
   scene_no_motion: !input scene_no_motion
 
@@ -135,12 +142,15 @@ trigger:
   to: "on"
 
 condition:
-  # Check if automation blocker exist and if yes if it is on, otherwise do not run
-  - condition: template
-    value_template: "{{ (automation_blocker == none) or (states[automation_blocker].state == 'on') }}"
-  # Check if elevation input exist and if yes it is below desired value, otherwise do not run
+  # Check if elevation input exist or is below desired value, otherwise do not run
   - condition: template
     value_template: "{{ (elevation_check == none) or (state_attr('sun.sun','elevation') <= elevation_check | float) }}"
+   # Check if automation blocker exist or is in desired state, otherwise do not run
+  - condition: or
+    conditions:
+      - "{{ automation_blocker == none }}"
+      - "{{ automation_blocker_boolean and states[automation_blocker].state == 'on' }}"
+      - "{{ not automation_blocker_boolean and states[automation_blocker].state == 'off' }}"
 
 action:
   - choose:
@@ -180,7 +190,7 @@ action:
       entity_id: !input motion_entity
       from: "on"
       to: "off"
-  - delay: !input no_motion_wait
+      for: !input no_motion_wait
   - choose:
       # Used if ambient scene is true and in ambient scene time frame
       - conditions:

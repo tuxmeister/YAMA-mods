@@ -1,6 +1,6 @@
 blueprint:
   name: Yet Another Motion Automation
-  description: Turn on a light scene when motion is detected. Five different scenes can be defined depending on time of day. V06
+  description: Turn on a light scene when motion is detected. Four different scenes can be defined depending on time of day. V07
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
@@ -15,6 +15,15 @@ blueprint:
         target:
           entity:
             domain: light
+    no_motion_wait:
+      name: Wait time
+      description: Time to leave the light on after last motion is detected.
+      default: 120
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds            
     automation_blocker:
       name: Automation Blocker (Optional)
       description: Only run if this boolean is in desired state (see next input)
@@ -24,10 +33,23 @@ blueprint:
           domain: input_boolean
     automation_blocker_boolean:
       name: Automation Blocker Chooser (Optional)
-      description: Should the automation blocker on or off? Choose on for on and off for off
+      description: Desired state of automation blocker, choose on for on and off for off
       default: false
       selector:
         boolean: 
+    no_motion_blocker:
+      name: No Motion Blocker (Optional)
+      description: No motion sequence is not run if this boolean is in desired state (see next input)
+      default:
+      selector:
+        entity:
+          domain: input_boolean
+    no_motion_blocker_boolean:
+      name: Automation Blocker Chooser (Optional)
+      description: Desired state no motion blocker, choose on for on and off for off
+      default: false
+      selector:
+        boolean:         
     elevation_check:
       name: Sun elevation check (Optional)
       description: This is the angle between the sun and the horizon. Negative values mean the sun is BELOW the horizon.
@@ -45,61 +67,61 @@ blueprint:
         entity:
           domain: scene
     time_scene_ambient_start:
-      name: Ambient time frame start
+      name: Ambient time frame start (Optional)
       description: Time from which on ambient scene will be activated
       default: "00:00:00"
       selector:
         time:
     time_scene_ambient_end:
-      name: Ambient time frame end
+      name: Ambient time frame end (Optional)
       description: Time from which on ambient scene will be not activated
       default: "00:00:00"
       selector:
         time:
     scene_morning:
-      name: Scene for the morning
+      name: Scene for the morning (Optional)
       default: scene.none
       selector:
         entity:
           domain: scene
     time_scene_morning:
-      name: Time for the morning scene
+      name: Time for the morning scene (Optional)
       description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
     scene_day:
-      name: Scene for the bright day
+      name: Scene for the bright day (Optional)
       default: scene.none
       selector:
         entity:
           domain: scene
     time_scene_day:
-      name: Time for the day scene
+      name: Time for the day scene (Optional)
       description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
     scene_evening:
-      name: Scene for the evening
+      name: Scene for the evening (Optional)
       default: scene.none
       selector:
         entity:
           domain: scene
     time_scene_evening:
-      name: Time for the evening scene
+      name: Time for the evening scene (Optional)
       description: A time input which defines the time from which on the scene will be activated if motion is detected.
       default: "00:00:00"
       selector:
         time:
     scene_night:
-      name: Scene for the dark night
+      name: Scene for the dark night (Optional)
       default: scene.none
       selector:
         entity:
           domain: scene
     time_scene_night:
-      name: Time for the night scene
+      name: Time for the night scene (Optional)
       description: A time input which defines the time from which on the scene will be activated if motion is detectedd.
       default: "00:00:00"
       selector:
@@ -111,15 +133,7 @@ blueprint:
       selector:
         entity:
           domain: scene
-    no_motion_wait:
-      name: Wait time
-      description: Time to leave the light on after last motion is detected.
-      default: 120
-      selector:
-        number:
-          min: 0
-          max: 3600
-          unit_of_measurement: seconds
+
 
 mode: restart
 max_exceeded: silent
@@ -132,6 +146,8 @@ variables:
   scene_night: !input scene_night
   automation_blocker: !input automation_blocker
   automation_blocker_boolean : !input automation_blocker_boolean
+  no_motion_blocker: !input no_motion_blocker
+  no_motion_blocker_boolean: !input no_motion_blocker_boolean
   elevation_check: !input elevation_check
   scene_no_motion: !input scene_no_motion
 
@@ -191,6 +207,11 @@ action:
       from: "on"
       to: "off"
       for: !input no_motion_wait
+  - condition: or
+    conditions:
+      - "{{ no_motion_blocker == none }}"
+      - "{{ no_motion_blocker_boolean and states[no_motion_blocker].state == 'on' }}"
+      - "{{ not no_motion_blocker_boolean and states[no_motion_blocker].state == 'off' }}"
   - choose:
       # Used if ambient scene is true and in ambient scene time frame
       - conditions:

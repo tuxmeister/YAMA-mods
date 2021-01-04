@@ -1,18 +1,19 @@
 blueprint:
   name: Yet Another Motion Automation
   description: >
-    # YAMA V08
+    # YAMA V09
+
 
     Turn on lights or scenes when motion is detected. 
     
     Four different scenes can be defined depending on time of day.
-
-
+    
+    
     For Details see this forum post:
-
+    
     https://community.home-assistant.io/t/yama-yet-another-motion-automation-scenes-ambient-light-and-some-conditions/257062?u=networkingcat
-
-
+    
+    
     Capabilitys:
 
      - Trigger on motion (in fact can be triggered by anything that switches between “on” and off")
@@ -23,7 +24,6 @@ blueprint:
      - Ambient support with time frame (optional)
      - Default scene when motion stops (optional)
      - “no motion blocker” with user choosable state (optional)
-
   domain: automation
   source_url: https://gist.github.com/networkingcat/a1876d7e706e07c8bdcf974113940fb8
   input:
@@ -76,7 +76,7 @@ blueprint:
     elevation_check:
       name: Sun elevation check (Optional)
       description: This is the angle between the sun and the horizon. Negative values mean the sun is BELOW the horizon.
-      default:
+      default: none
       selector:
         number:
           min: -90
@@ -197,7 +197,7 @@ condition:
       - "{{ not automation_blocker_boolean and states[automation_blocker].state == 'off' }}"
   # Check if elevation input exist or is below desired value, otherwise do not run
   - condition: template
-    value_template: "{{ (elevation_check == none) or (state_attr('sun.sun','elevation') <= elevation_check | float) }}"
+    value_template: "{{ (elevation_check == none) or (state_attr('sun.sun','elevation') <= elevation_check | float(90)) }}"
 
 
 action:

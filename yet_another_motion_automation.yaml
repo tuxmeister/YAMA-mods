@@ -1,7 +1,7 @@
 blueprint:
   name: Yet Another Motion Automation
   description: >
-    # YAMA V09
+    # YAMA V10
 
 
     Turn on lights or scenes when motion is detected. 
@@ -18,7 +18,7 @@ blueprint:
 
      - Trigger on motion (in fact can be triggered by anything that switches between “on” and off")
      - Wait time for turning off
-     - Only run if input_boolean is in desired state (optional)
+     - Only run if entity is in desired state (optional)
      - Sun elevation check (optional)
      - 4 Scenes for different times of day (optional)
      - Ambient support with time frame (optional)
@@ -53,7 +53,6 @@ blueprint:
       default:
       selector:
         entity:
-          domain: input_boolean
     automation_blocker_boolean:
       name: Automation Blocker Chooser (Optional)
       description: Desired state of automation blocker, choose on for on and off for off
@@ -66,7 +65,6 @@ blueprint:
       default:
       selector:
         entity:
-          domain: input_boolean
     no_motion_blocker_boolean:
       name: No Motion Chooser (Optional)
       description: Desired state of no motion blocker, choose on for on and off for off

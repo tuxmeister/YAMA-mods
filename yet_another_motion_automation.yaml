@@ -1,7 +1,7 @@
 blueprint:
-  name: Yet Another Motion Automation
+  name: Yet Another Motion Automation - Mods by Faranhor
   description: >
-    # YAMA V10
+    # YAMA V10.1 - With lux
 
 
     Turn on lights or scenes when motion is detected. 

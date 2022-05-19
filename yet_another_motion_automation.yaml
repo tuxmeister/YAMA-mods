@@ -58,7 +58,13 @@ blueprint:
       description: Desired state of automation blocker, choose on for on and off for off
       default: false
       selector:
-        boolean: 
+        boolean:
+    automation_blocker_lux:
+      name: Automation Blocker - Lux limit (Optional)
+      description: Set min Lux to trigger On
+      default: false
+      selector:
+        attribute:
     no_motion_blocker:
       name: No Motion Blocker (Optional)
       description: No motion sequence is not run if this boolean is in desired state (see next input)
@@ -167,6 +173,7 @@ variables:
   scene_night: !input scene_night
   automation_blocker: !input automation_blocker
   automation_blocker_boolean : !input automation_blocker_boolean
+  automation_blocker_lux : !input automation_blocker_lux
   no_motion_blocker: !input no_motion_blocker
   no_motion_blocker_boolean: !input no_motion_blocker_boolean
   elevation_check: !input elevation_check

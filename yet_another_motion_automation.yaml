@@ -204,6 +204,10 @@ condition:
   - condition: template
     value_template: "{{ (elevation_check == none) or (state_attr('sun.sun','elevation') <= elevation_check | float(90)) }}"
 
+  # Check if Lux is below desired limit, otherwise do not run
+  - condition: template
+    value_template: "{{ (lux_check == none) }}"
+
 
 action:
   - choose:
